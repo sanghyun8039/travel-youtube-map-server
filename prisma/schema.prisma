@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Channel {
+  id           String   @id @default(uuid())
+  channelId    String   @unique
+  channelName  String
+  channelUrl   String
+  thumbnailUrl String?
+  createdAt    DateTime @default(now())
+
+  videos       Video[]
+}
+
+model Video {
+  id          String   @id @default(uuid())
+  videoId     String   @unique
+  title       String
+  channelId   String
+  channel     Channel  @relation(fields: [channelId], references: [id])
+  destCity    String?
+  destCountry String?
+  analyzedAt  DateTime @default(now())
+
+  places      VideoPlace[]
+}
+
+model Place {
+  id            String   @id @default(uuid())
+  googlePlaceId String   @unique
+  name          String
+  address       String?
+  city          String?
+  country       String?
+  countryCode   String?
+  lat           Float
+  lng           Float
+  createdAt     DateTime @default(now())
+
+  appearances   VideoPlace[]
+}
+
+model VideoPlace {
+  id          String   @id @default(uuid())
+  videoId     String
+  video       Video    @relation(fields: [videoId], references: [id])
+  placeId     String?
+  place       Place?   @relation(fields: [placeId], references: [id])
+  timestamp   Int
+  localName   String
+  description String?
+  orderIndex  Int
+
+  @@unique([videoId, orderIndex])
+}

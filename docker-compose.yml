@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: travel_youtube_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: yourpassword
+      POSTGRES_DB: travel_youtube_map
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  server:
+    build: .
+    container_name: travel_youtube_server
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://postgres:yourpassword@postgres:5432/travel_youtube_map?schema=public
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    command: sh -c "npx prisma migrate deploy && node dist/src/main"
+
+volumes:
+  postgres_data:
