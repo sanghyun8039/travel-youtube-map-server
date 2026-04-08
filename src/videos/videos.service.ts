@@ -6,7 +6,7 @@ import { PrismaPg } from '@prisma/adapter-pg'
 export interface SaveVideoDto {
   videoId: string
   title: string
-  channel: {
+  channel?: {
     channelId: string
     channelName: string
     channelUrl: string
@@ -36,19 +36,43 @@ export class VideosService {
   private prisma = new PrismaClient({ adapter: this.adapter })
 
   async saveVideo(dto: SaveVideoDto) {
+    let channelInfo = dto.channel
+
+    try {
+      const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${dto.videoId}&format=json`)
+      if (response.ok) {
+        const data = await response.json()
+        const authorUrl: string = data.author_url || ''
+        const extractedId = authorUrl.split('/').pop() || data.author_name
+
+        channelInfo = {
+          channelId: channelInfo?.channelId || extractedId,
+          channelName: data.author_name || channelInfo?.channelName || 'Unknown',
+          channelUrl: data.author_url || channelInfo?.channelUrl || '',
+          thumbnailUrl: channelInfo?.thumbnailUrl,
+        }
+      }
+    } catch (e) {
+      console.error('oEmbed fetch error:', e)
+    }
+
+    if (!channelInfo) {
+      throw new Error('Channel information is required')
+    }
+
     // upsert channel
     const channel = await this.prisma.channel.upsert({
-      where: { channelId: dto.channel.channelId },
+      where: { channelId: channelInfo.channelId },
       update: {
-        channelName: dto.channel.channelName,
-        channelUrl: dto.channel.channelUrl,
-        thumbnailUrl: dto.channel.thumbnailUrl,
+        channelName: channelInfo.channelName,
+        channelUrl: channelInfo.channelUrl,
+        ...(channelInfo.thumbnailUrl && { thumbnailUrl: channelInfo.thumbnailUrl }),
       },
       create: {
-        channelId: dto.channel.channelId,
-        channelName: dto.channel.channelName,
-        channelUrl: dto.channel.channelUrl,
-        thumbnailUrl: dto.channel.thumbnailUrl,
+        channelId: channelInfo.channelId,
+        channelName: channelInfo.channelName,
+        channelUrl: channelInfo.channelUrl,
+        thumbnailUrl: channelInfo.thumbnailUrl,
       },
     })
 
