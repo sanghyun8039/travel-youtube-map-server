@@ -45,11 +45,13 @@ export class VideosService {
         const authorUrl: string = data.author_url || ''
         const extractedId = authorUrl.split('/').pop() || data.author_name
 
+        dto.title = data.title || dto.title
+
         channelInfo = {
           channelId: channelInfo?.channelId || extractedId,
           channelName: data.author_name || channelInfo?.channelName || 'Unknown',
           channelUrl: data.author_url || channelInfo?.channelUrl || '',
-          thumbnailUrl: channelInfo?.thumbnailUrl,
+          thumbnailUrl: data.thumbnail_url || channelInfo?.thumbnailUrl,
         }
       }
     } catch (e) {
