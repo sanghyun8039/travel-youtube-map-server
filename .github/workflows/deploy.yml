@@ -16,7 +16,7 @@ jobs:
         # 보안을 위해 GitHub Secrets를 쓰면 좋지만, 일단 직접 파일 생성
         # DATABASE_URL은 라즈베리파이 내부에서 돌기 때문에 localhost를 써도 됨 (network host 모드 사용 시)
         run: |
-          echo "DATABASE_URL=postgresql://postgres:pi@127.0.0.1:5432/postgres" > .env
+          echo "DATABASE_URL=postgresql://postgres:pi@192.168.31.31:5432/travel_youtube_map?schema=public" > .env
 
       - name: 기존 서버 끄기 (있다면)
         continue-on-error: true
