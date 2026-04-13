@@ -77,4 +77,41 @@ export class PlacesService {
       })),
     }))
   }
+
+  async getVideosByPlace(googlePlaceId: string, excludeVideoId?: string) {
+    const place = await this.prisma.place.findUnique({
+      where: { googlePlaceId },
+      include: {
+        appearances: {
+          ...(excludeVideoId && {
+            where: { video: { videoId: { not: excludeVideoId } } },
+          }),
+          include: {
+            video: {
+              include: {
+                channel: true,
+                _count: { select: { places: true } },
+              },
+            },
+          },
+          orderBy: { video: { analyzedAt: 'desc' } },
+          take: 10,
+        },
+      },
+    })
+
+    if (!place) return []
+
+    return place.appearances.map((a) => ({
+      id: a.video.id,
+      videoId: a.video.videoId,
+      title: a.video.title,
+      destCity: a.video.destCity ?? null,
+      destCountry: a.video.destCountry ?? null,
+      channelName: a.video.channel.channelName,
+      channelThumbnailUrl: a.video.channel.thumbnailUrl ?? '',
+      placeCount: a.video._count.places,
+      analyzedAt: a.video.analyzedAt.toISOString(),
+    }))
+  }
 }
