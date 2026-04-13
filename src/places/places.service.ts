@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common'
-import { PrismaClient } from '@prisma/client'
-import { Pool } from 'pg'
-import { PrismaPg } from '@prisma/adapter-pg'
+import { Injectable } from "@nestjs/common";
+import { PrismaClient } from "@prisma/client";
+import { Pool } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 @Injectable()
 export class PlacesService {
-  private pool = new Pool({ connectionString: process.env.DATABASE_URL })
-  private adapter = new PrismaPg(this.pool)
-  private prisma = new PrismaClient({ adapter: this.adapter })
+  private pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  private adapter = new PrismaPg(this.pool);
+  private prisma = new PrismaClient({ adapter: this.adapter });
 
   // 모든 장소 (지도 표시용)
   async getAllPlaces() {
@@ -21,7 +21,7 @@ export class PlacesService {
           },
         },
       },
-    })
+    });
 
     return places.map((p) => ({
       id: p.id,
@@ -40,7 +40,7 @@ export class PlacesService {
         description: a.description,
         channelName: a.video.channel.channelName,
       })),
-    }))
+    }));
   }
 
   // 특정 도시/나라의 장소
@@ -56,7 +56,7 @@ export class PlacesService {
           },
         },
       },
-    })
+    });
 
     return places.map((p) => ({
       id: p.id,
@@ -75,7 +75,7 @@ export class PlacesService {
         description: a.description,
         channelName: a.video.channel.channelName,
       })),
-    }))
+    }));
   }
 
   async getVideosByPlace(googlePlaceId: string, excludeVideoId?: string) {
@@ -94,13 +94,13 @@ export class PlacesService {
               },
             },
           },
-          orderBy: { video: { analyzedAt: 'desc' } },
+          orderBy: { video: { analyzedAt: "desc" } },
           take: 10,
         },
       },
-    })
+    });
 
-    if (!place) return []
+    if (!place) return [];
 
     return place.appearances.map((a) => ({
       id: a.video.id,
@@ -109,9 +109,10 @@ export class PlacesService {
       destCity: a.video.destCity ?? null,
       destCountry: a.video.destCountry ?? null,
       channelName: a.video.channel.channelName,
-      channelThumbnailUrl: a.video.channel.thumbnailUrl ?? '',
+      channelThumbnailUrl: a.video.channel.thumbnailUrl ?? "",
       placeCount: a.video._count.places,
       analyzedAt: a.video.analyzedAt.toISOString(),
-    }))
+      timestamp: a.timestamp,
+    }));
   }
 }
