@@ -53,3 +53,13 @@ sudo ./svc.sh start
 docker-compose ps
 docker-compose logs -f server
 ```
+
+---
+
+## 4. 트러블슈팅 (Troubleshooting)
+
+### 4.1 "Port is already allocated" 에러
+라즈베리파이 내부(Native)에 이미 Postgres가 깔려있어 5432 포트가 충돌하는 경우입니다.
+
+1. **내부 Postgres 끄기:** `sudo systemctl stop postgresql && sudo systemctl disable postgresql`
+2. **또는 도커 포트 변경:** GitHub Secrets에 `POSTGRES_HOST_PORT`를 `5433` 등으로 설정.
