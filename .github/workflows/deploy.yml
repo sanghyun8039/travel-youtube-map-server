@@ -13,19 +13,14 @@ jobs:
         uses: actions/checkout@v3
 
       - name: 환경변수 파일(.env) 생성
-        # 보안을 위해 GitHub Secrets를 쓰면 좋지만, 일단 직접 파일 생성
-        # DATABASE_URL은 라즈베리파이 내부에서 돌기 때문에 localhost를 써도 됨 (network host 모드 사용 시)
+        # 보안을 위해 GitHub Secrets 활용
         run: |
-          echo "DATABASE_URL=postgresql://postgres:pi@192.168.31.31:5432/travel_youtube_map?schema=public" > .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER || 'postgres' }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD || 'pi' }}" >> .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB || 'travel_youtube_map' }}" >> .env
 
-      - name: 기존 서버 끄기 (있다면)
-        continue-on-error: true
-        run: docker stop travel-youtube-map-server && docker rm travel-youtube-map-server
-
-      - name: 도커 이미지 빌드
-        run: docker build -t travel-youtube-map-server .
-
-      - name: 서버 실행 (네트워크 호스트 모드)
-        # --network host: 라즈베리파이의 IP를 그대로 사용 (DB 접속 쉬움)
-        # --restart always: 라즈베리파이 켜지면 자동 실행
-        run: docker run -d --name travel-youtube-map-server --network host --restart always travel-youtube-map-server
+      - name: 서버 배포 (docker-compose)
+        # --build: 소스 변경 시 새로 빌드
+        # -d: 백그라운드 실행
+        run: docker-compose up -d --build
