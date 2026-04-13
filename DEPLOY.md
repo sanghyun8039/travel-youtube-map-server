@@ -17,7 +17,20 @@ GitHub 저장소의 `Settings` -> `Secrets and variables` -> `Actions`에 아래
 
 ## 2. 라즈베리파이 Self-Hosted Runner 설정
 
-### 2.1 러너 다운로드 및 설치
+### 2.1 도커 및 컴포즈 설치 (설치되지 않은 경우)
+라즈베리파이에서 아래 명령어를 실행하여 설치합니다.
+
+```bash
+# 도커 설치
+curl -sSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+
+# 도커 컴포즈 V2 설치 (권장)
+sudo apt-get update
+sudo apt-get install docker-compose-plugin
+```
+
+### 2.2 러너 다운로드 및 설치
 1. GitHub 저장소의 `Settings` -> `Actions` -> `Runners` -> `New self-hosted runner` 클릭
 2. `Linux` -> `ARM64` 선택 후 나오는 가이드 명령어를 터미널에서 순서대로 실행
 

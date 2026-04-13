@@ -21,6 +21,10 @@ jobs:
           echo "POSTGRES_DB=${{ secrets.POSTGRES_DB || 'travel_youtube_map' }}" >> .env
 
       - name: 서버 배포 (docker-compose)
-        # --build: 소스 변경 시 새로 빌드
-        # -d: 백그라운드 실행
-        run: docker-compose up -d --build
+        # docker compose(V2)를 우선 시도하고, 없으면 docker-compose(V1) 사용
+        run: |
+          if docker compose version > /dev/null 2>&1; then
+            docker compose up -d --build
+          else
+            docker-compose up -d --build
+          fi
