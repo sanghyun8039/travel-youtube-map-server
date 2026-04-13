@@ -15,10 +15,11 @@ jobs:
       - name: 환경변수 파일(.env) 생성
         # 보안을 위해 GitHub Secrets 활용
         run: |
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER || 'postgres' }}" >> .env
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD || 'pi' }}" >> .env
           echo "POSTGRES_DB=${{ secrets.POSTGRES_DB || 'travel_youtube_map' }}" >> .env
+          # 도커 네트워크 내부에서는 서비스 이름인 'postgres'를 사용해야 함
+          echo "DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER || 'postgres' }}:${{ secrets.POSTGRES_PASSWORD || 'pi' }}@postgres:5432/${{ secrets.POSTGRES_DB || 'travel_youtube_map' }}?schema=public" >> .env
 
       - name: 기존 수동 컨테이너 중지 (있는 경우)
         # 이전에 docker run 명령어로 띄웠던 컨테이너와 이름이 겹칠 수 있으므로 정리

@@ -21,12 +21,12 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:pi@postgres:5432/travel_youtube_map?schema=public}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-pi}@postgres:5432/${POSTGRES_DB:-travel_youtube_map}?schema=public
       PORT: 3001
 
     ports:
       - "3001:3001"
-    command: sh -c "npx prisma migrate deploy && node dist/src/main"
+    command: sh -c "npx prisma db push && node dist/src/main"
 
 volumes:
   postgres_data:
