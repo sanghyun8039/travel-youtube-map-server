@@ -30,15 +30,15 @@ jobs:
           # JWT
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
 
-          # 카카오 OAuth
-          echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
-          echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
-          echo "KAKAO_CALLBACK_URL=${{ secrets.KAKAO_CALLBACK_URL }}" >> .env
+          # # 카카오 OAuth
+          # echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
+          # echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
+          # echo "KAKAO_CALLBACK_URL=${{ secrets.KAKAO_CALLBACK_URL }}" >> .env
 
-          # 네이버 OAuth
-          echo "NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}" >> .env
-          echo "NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}" >> .env
-          echo "NAVER_CALLBACK_URL=${{ secrets.NAVER_CALLBACK_URL }}" >> .env
+          # # 네이버 OAuth
+          # echo "NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}" >> .env
+          # echo "NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}" >> .env
+          # echo "NAVER_CALLBACK_URL=${{ secrets.NAVER_CALLBACK_URL }}" >> .env
 
           # 구글 OAuth
           echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
