@@ -28,6 +28,7 @@ model Video {
   analyzedAt  DateTime @default(now())
 
   places      VideoPlace[]
+  savedVideos SavedVideo[]
 }
 
 model Place {
@@ -43,6 +44,7 @@ model Place {
   createdAt     DateTime @default(now())
 
   appearances   VideoPlace[]
+  favoritePlaces FavoritePlace[]
 }
 
 model VideoPlace {
@@ -57,4 +59,51 @@ model VideoPlace {
   orderIndex  Int
 
   @@unique([videoId, orderIndex])
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String?  @unique
+  name         String?
+  refreshToken String?  @unique
+  signupSource String?  // "kakao", "naver", "google"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  socialAccounts SocialAccount[]
+  favoritePlaces FavoritePlace[]
+  savedVideos    SavedVideo[]
+}
+
+model SocialAccount {
+  id         String   @id @default(uuid())
+  provider   String   // "kakao", "naver", "google"
+  providerId String   // Provider's unique user ID
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerId])
+}
+
+model FavoritePlace {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  placeId   String
+  place     Place    @relation(fields: [placeId], references: [id])
+  memo      String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, placeId])
+}
+
+model SavedVideo {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  videoId   String
+  video     Video    @relation(fields: [videoId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, videoId])
 }
