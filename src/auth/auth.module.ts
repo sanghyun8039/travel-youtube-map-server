@@ -8,6 +8,13 @@ import { NaverStrategy } from './strategies/naver.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
+// 환경변수가 존재하는 OAuth 전략만 동적으로 등록
+const oauthStrategies = [
+  ...(process.env.KAKAO_CLIENT_ID ? [KakaoStrategy] : []),
+  ...(process.env.NAVER_CLIENT_ID ? [NaverStrategy] : []),
+  ...(process.env.GOOGLE_CLIENT_ID ? [GoogleStrategy] : []),
+];
+
 @Module({
   imports: [
     PassportModule,
@@ -17,7 +24,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, KakaoStrategy, NaverStrategy, GoogleStrategy, JwtStrategy],
+  providers: [AuthService, JwtStrategy, ...oauthStrategies],
   exports: [AuthService],
 })
 export class AuthModule {}
+
