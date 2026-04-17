@@ -45,10 +45,11 @@ export class AuthController {
     const { access_token } = await this.authService.login(user);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie('jwt', access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax', // 크로스 도메인 쿠키 전송을 위해 production에서 none 사용
       path: '/',
       maxAge: 3600000, // 1시간
     });
