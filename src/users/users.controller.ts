@@ -7,6 +7,7 @@ import {
   Body,
   UseGuards,
   Req,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from './users.service';
@@ -22,6 +23,9 @@ export class UsersController {
     @Req() req: AuthenticatedRequest,
     @Body() body: { videoId: string },
   ) {
+    if (!body?.videoId || typeof body.videoId !== 'string') {
+      throw new BadRequestException('videoId is required');
+    }
     return this.usersService.saveVideo(req.user.id, body.videoId);
   }
 

@@ -82,8 +82,8 @@ export class UsersService {
       title: row.video.title,
       destCountry: row.video.destCountry,
       destCity: row.video.destCity,
-      channelName: row.video.channel.channelName,
-      channelThumbnailUrl: row.video.channel.thumbnailUrl,
+      channelName: row.video.channel?.channelName ?? '',
+      channelThumbnailUrl: row.video.channel?.thumbnailUrl ?? null,
       placeCount: row.video._count.places,
       analyzedAt: row.video.analyzedAt.toISOString(),
     }));
