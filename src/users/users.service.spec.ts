@@ -116,6 +116,8 @@ describe('UsersService', () => {
 
   describe('getSavedVideos', () => {
     it('저장된 비디오 목록을 VideoSummary 형태로 반환한다', async () => {
+      // 실제 Prisma 스키마: Video에 channelName/channelThumbnailUrl/destDistrict 없음
+      // channelName, thumbnailUrl은 Channel 관계를 통해 접근
       mockPrisma.savedVideo.findMany.mockResolvedValue([
         {
           video: {
@@ -124,9 +126,10 @@ describe('UsersService', () => {
             title: '오사카 여행',
             destCountry: 'JP',
             destCity: '오사카',
-            destDistrict: null,
-            channelName: '여행채널',
-            channelThumbnailUrl: 'https://example.com/thumb.jpg',
+            channel: {
+              channelName: '여행채널',
+              thumbnailUrl: 'https://example.com/thumb.jpg',
+            },
             analyzedAt: new Date('2026-01-01'),
             _count: { places: 8 },
           },
@@ -145,10 +148,13 @@ describe('UsersService', () => {
               title: true,
               destCountry: true,
               destCity: true,
-              destDistrict: true,
-              channelName: true,
-              channelThumbnailUrl: true,
               analyzedAt: true,
+              channel: {
+                select: {
+                  channelName: true,
+                  thumbnailUrl: true,
+                },
+              },
               _count: { select: { places: true } },
             },
           },
@@ -163,7 +169,6 @@ describe('UsersService', () => {
           title: '오사카 여행',
           destCountry: 'JP',
           destCity: '오사카',
-          destDistrict: null,
           channelName: '여행채널',
           channelThumbnailUrl: 'https://example.com/thumb.jpg',
           placeCount: 8,

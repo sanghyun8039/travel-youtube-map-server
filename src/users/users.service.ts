@@ -52,7 +52,7 @@ export class UsersService {
   }
 
   async getSavedVideos(userId: string) {
-    const rows: any[] = await (this.prisma.savedVideo as any).findMany({
+    const rows = await this.prisma.savedVideo.findMany({
       where: { userId },
       include: {
         video: {
@@ -62,10 +62,13 @@ export class UsersService {
             title: true,
             destCountry: true,
             destCity: true,
-            destDistrict: true,
-            channelName: true,
-            channelThumbnailUrl: true,
             analyzedAt: true,
+            channel: {
+              select: {
+                channelName: true,
+                thumbnailUrl: true,
+              },
+            },
             _count: { select: { places: true } },
           },
         },
@@ -79,9 +82,8 @@ export class UsersService {
       title: row.video.title,
       destCountry: row.video.destCountry,
       destCity: row.video.destCity,
-      destDistrict: row.video.destDistrict,
-      channelName: row.video.channelName,
-      channelThumbnailUrl: row.video.channelThumbnailUrl,
+      channelName: row.video.channel.channelName,
+      channelThumbnailUrl: row.video.channel.thumbnailUrl,
       placeCount: row.video._count.places,
       analyzedAt: row.video.analyzedAt.toISOString(),
     }));
