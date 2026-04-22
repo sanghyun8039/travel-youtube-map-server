@@ -90,6 +90,15 @@ describe('UsersService', () => {
       const result = await service.unsaveVideo('user-1', 'yt-abc123');
       expect(result).toEqual({ saved: false });
     });
+
+    it('비디오 자체가 DB에 없으면 delete 호출 없이 { saved: false } 반환', async () => {
+      mockPrisma.video.findUnique.mockResolvedValue(null);
+
+      const result = await service.unsaveVideo('user-1', 'nonexistent');
+
+      expect(mockPrisma.savedVideo.delete).not.toHaveBeenCalled();
+      expect(result).toEqual({ saved: false });
+    });
   });
 
   describe('isSaved', () => {
@@ -115,6 +124,28 @@ describe('UsersService', () => {
   });
 
   describe('getSavedVideos', () => {
+    it('channel이 null이면 channelName 빈 문자열, channelThumbnailUrl null로 폴백', async () => {
+      mockPrisma.savedVideo.findMany.mockResolvedValue([
+        {
+          video: {
+            id: 'video-uuid-2',
+            videoId: 'yt-xyz',
+            title: '채널 없는 영상',
+            destCountry: 'KR',
+            destCity: '서울',
+            channel: null,
+            analyzedAt: new Date('2026-02-01'),
+            _count: { places: 3 },
+          },
+        },
+      ]);
+
+      const result = await service.getSavedVideos('user-1');
+
+      expect(result[0].channelName).toBe('');
+      expect(result[0].channelThumbnailUrl).toBeNull();
+    });
+
     it('저장된 비디오 목록을 VideoSummary 형태로 반환한다', async () => {
       // 실제 Prisma 스키마: Video에 channelName/channelThumbnailUrl/destDistrict 없음
       // channelName, thumbnailUrl은 Channel 관계를 통해 접근

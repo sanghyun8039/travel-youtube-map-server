@@ -32,6 +32,18 @@ describe('UsersController', () => {
     expect(result).toEqual({ saved: true });
   });
 
+  it('POST /users/saved-videos — videoId 없으면 BadRequestException', () => {
+    expect(() =>
+      controller.saveVideo(mockRequest as any, {} as any),
+    ).toThrow('videoId is required');
+  });
+
+  it('POST /users/saved-videos — videoId가 문자열이 아니면 BadRequestException', () => {
+    expect(() =>
+      controller.saveVideo(mockRequest as any, { videoId: 123 } as any),
+    ).toThrow('videoId is required');
+  });
+
   it('DELETE /users/saved-videos/:videoId → unsaveVideo 호출', async () => {
     mockUsersService.unsaveVideo.mockResolvedValue({ saved: false });
     const result = await controller.unsaveVideo(mockRequest as any, 'yt-abc123');
