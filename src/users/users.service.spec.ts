@@ -58,7 +58,7 @@ describe('UsersService', () => {
       mockPrisma.video.findUnique.mockResolvedValue(null);
 
       await expect(service.saveVideo('user-1', 'nonexistent')).rejects.toThrow(
-        NotFoundException,
+        'Video not found',
       );
     });
   });

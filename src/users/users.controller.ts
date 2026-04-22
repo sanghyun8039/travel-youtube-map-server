@@ -34,6 +34,9 @@ export class UsersController {
     @Req() req: AuthenticatedRequest,
     @Param('videoId') youtubeVideoId: string,
   ) {
+    if (!youtubeVideoId || youtubeVideoId.length > 64) {
+      throw new BadRequestException('videoId is required');
+    }
     return this.usersService.unsaveVideo(req.user.id, youtubeVideoId);
   }
 
@@ -50,6 +53,9 @@ export class UsersController {
     @Req() req: AuthenticatedRequest,
     @Param('videoId') youtubeVideoId: string,
   ) {
+    if (!youtubeVideoId || youtubeVideoId.length > 64) {
+      throw new BadRequestException('videoId is required');
+    }
     const saved = await this.usersService.isSaved(req.user.id, youtubeVideoId);
     return { saved };
   }

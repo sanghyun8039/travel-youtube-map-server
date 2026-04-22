@@ -17,7 +17,7 @@ export class UsersService {
   async saveVideo(userId: string, youtubeVideoId: string): Promise<{ saved: boolean }> {
     const videoId = await this.findVideoIdByYoutubeId(youtubeVideoId);
     if (!videoId) {
-      throw new NotFoundException(`Video not found: ${youtubeVideoId}`);
+      throw new NotFoundException('Video not found');
     }
     await this.prisma.savedVideo.upsert({
       where: { userId_videoId: { userId, videoId } },

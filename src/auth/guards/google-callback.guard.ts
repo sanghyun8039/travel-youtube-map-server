@@ -29,6 +29,6 @@ export class GoogleCallbackGuard extends AuthGuard('google') {
       return false;
     }
 
-    return super.canActivate(context) as Promise<boolean>;
+    return Promise.resolve(super.canActivate(context) as boolean | Promise<boolean>);
   }
 }

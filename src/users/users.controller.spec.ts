@@ -57,6 +57,12 @@ describe('UsersController', () => {
     expect(result).toEqual({ saved: false });
   });
 
+  it('DELETE /users/saved-videos/:videoId — videoId 64자 초과면 BadRequestException', () => {
+    expect(() =>
+      controller.unsaveVideo(mockRequest as any, 'a'.repeat(65)),
+    ).toThrow('videoId is required');
+  });
+
   it('GET /users/saved-videos → getSavedVideos 호출', async () => {
     mockUsersService.getSavedVideos.mockResolvedValue([]);
     const result = await controller.getSavedVideos(mockRequest as any);
@@ -69,5 +75,11 @@ describe('UsersController', () => {
     const result = await controller.checkSaved(mockRequest as any, 'yt-abc123');
     expect(mockUsersService.isSaved).toHaveBeenCalledWith('user-1', 'yt-abc123');
     expect(result).toEqual({ saved: true });
+  });
+
+  it('GET /users/saved-videos/:videoId — videoId 64자 초과면 BadRequestException', async () => {
+    await expect(
+      controller.checkSaved(mockRequest as any, 'a'.repeat(65)),
+    ).rejects.toThrow('videoId is required');
   });
 });
