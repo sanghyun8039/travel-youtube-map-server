@@ -2,6 +2,7 @@ import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
+import { GoogleCallbackGuard } from './guards/google-callback.guard';
 import type {
   AuthenticatedRequest,
   AuthenticatedUser,
@@ -46,7 +47,7 @@ export class AuthController {
   async googleLogin() {}
 
   @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
+  @UseGuards(GoogleCallbackGuard)
   async googleLoginCallback(
     @Req() req: AuthenticatedRequest,
     @Res() res: Response,
