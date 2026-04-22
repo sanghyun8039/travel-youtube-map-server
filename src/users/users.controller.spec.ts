@@ -44,6 +44,12 @@ describe('UsersController', () => {
     ).toThrow('videoId is required');
   });
 
+  it('POST /users/saved-videos — videoId가 64자 초과면 BadRequestException', () => {
+    expect(() =>
+      controller.saveVideo(mockRequest as any, { videoId: 'a'.repeat(65) }),
+    ).toThrow('videoId is required');
+  });
+
   it('DELETE /users/saved-videos/:videoId → unsaveVideo 호출', async () => {
     mockUsersService.unsaveVideo.mockResolvedValue({ saved: false });
     const result = await controller.unsaveVideo(mockRequest as any, 'yt-abc123');

@@ -35,8 +35,11 @@ export class UsersService {
       await this.prisma.savedVideo.delete({
         where: { userId_videoId: { userId, videoId } },
       });
-    } catch {
-      // 이미 삭제됐거나 없는 경우 — 무시
+    } catch (e: unknown) {
+      // P2025: 이미 삭제됐거나 존재하지 않는 레코드 — 정상적인 경우이므로 무시
+      // 그 외 에러(DB 연결 장애 등)는 500으로 전파
+      const code = (e as { code?: string })?.code;
+      if (code !== 'P2025') throw e;
     }
     return { saved: false };
   }

@@ -81,14 +81,21 @@ describe('UsersService', () => {
       expect(result).toEqual({ saved: false });
     });
 
-    it('저장되지 않은 비디오 취소 시도는 에러 무시하고 { saved: false } 반환', async () => {
+    it('P2025(레코드 없음) 에러는 무시하고 { saved: false } 반환', async () => {
       mockPrisma.video.findUnique.mockResolvedValue({ id: 'video-uuid-1' });
-      mockPrisma.savedVideo.delete.mockRejectedValue(
-        new Error('Record to delete does not exist'),
-      );
+      const p2025 = Object.assign(new Error('Record to delete does not exist'), { code: 'P2025' });
+      mockPrisma.savedVideo.delete.mockRejectedValue(p2025);
 
       const result = await service.unsaveVideo('user-1', 'yt-abc123');
       expect(result).toEqual({ saved: false });
+    });
+
+    it('P2025 외 에러(DB 장애 등)는 상위로 전파', async () => {
+      mockPrisma.video.findUnique.mockResolvedValue({ id: 'video-uuid-1' });
+      const dbError = Object.assign(new Error('Connection refused'), { code: 'P1001' });
+      mockPrisma.savedVideo.delete.mockRejectedValue(dbError);
+
+      await expect(service.unsaveVideo('user-1', 'yt-abc123')).rejects.toThrow('Connection refused');
     });
 
     it('비디오 자체가 DB에 없으면 delete 호출 없이 { saved: false } 반환', async () => {
