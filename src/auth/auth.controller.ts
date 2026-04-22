@@ -82,7 +82,13 @@ export class AuthController {
    */
   @Post('logout')
   logout(@Res() res: Response) {
-    res.clearCookie('jwt', { path: '/' });
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.clearCookie('jwt', {
+      path: '/',
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+    });
     return res.status(204).send();
   }
 
