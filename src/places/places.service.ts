@@ -74,6 +74,24 @@ export class PlacesService {
     }));
   }
 
+  async getPlaceById(googlePlaceId: string) {
+    const place = await this.prisma.place.findUnique({
+      where: { googlePlaceId },
+    });
+    if (!place) return null;
+    return {
+      id: place.id,
+      googlePlaceId: place.googlePlaceId,
+      name: place.name,
+      address: place.address,
+      city: place.city,
+      country: place.country,
+      countryCode: place.countryCode,
+      lat: place.lat,
+      lng: place.lng,
+    };
+  }
+
   async getVideosByPlace(googlePlaceId: string, excludeVideoId?: string) {
     const place = await this.prisma.place.findUnique({
       where: { googlePlaceId },

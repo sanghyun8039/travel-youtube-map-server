@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common'
+import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common'
 import { PlacesService } from './places.service'
 
 @Controller('places')
@@ -13,6 +13,15 @@ export class PlacesController {
   @Get('country/:countryCode')
   async getPlacesByCountry(@Param('countryCode') countryCode: string) {
     return this.placesService.getPlacesByCountry(countryCode)
+  }
+
+  @Get(':googlePlaceId')
+  async getPlaceById(@Param('googlePlaceId') googlePlaceId: string) {
+    const place = await this.placesService.getPlaceById(googlePlaceId)
+    if (!place) {
+      throw new NotFoundException(`Place not found: ${googlePlaceId}`)
+    }
+    return place
   }
 
   @Get(':googlePlaceId/videos')
