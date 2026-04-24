@@ -15,20 +15,20 @@ export class PlacesController {
     return this.placesService.getPlacesByCountry(countryCode)
   }
 
-  @Get(':googlePlaceId')
-  async getPlaceById(@Param('googlePlaceId') googlePlaceId: string) {
-    const place = await this.placesService.getPlaceById(googlePlaceId)
-    if (!place) {
-      throw new NotFoundException(`Place not found: ${googlePlaceId}`)
-    }
-    return place
-  }
-
   @Get(':googlePlaceId/videos')
   async getVideosByPlace(
     @Param('googlePlaceId') googlePlaceId: string,
     @Query('exclude') exclude?: string,
   ) {
     return this.placesService.getVideosByPlace(googlePlaceId, exclude)
+  }
+
+  @Get(':googlePlaceId')
+  async getPlaceById(@Param('googlePlaceId') googlePlaceId: string) {
+    const place = await this.placesService.getPlaceById(googlePlaceId)
+    if (!place) {
+      throw new NotFoundException('Place not found')
+    }
+    return place
   }
 }
