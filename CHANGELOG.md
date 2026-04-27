@@ -2,6 +2,15 @@
 
 All notable changes to travel-youtube-map-server will be documented in this file.
 
+## [0.2.0] - 2026-04-27
+
+### Added
+- **`GET /places/:googlePlaceId`** — 구글 장소 ID로 장소 상세 정보를 조회하는 엔드포인트 추가. 프론트엔드 장소 상세 페이지(`/place/:googlePlaceId`)에서 사용.
+
+### Fixed
+- **Safari OAuth 로그인** — BFF(Backend for Frontend) 패턴 적용. `handleLoginSuccess`에서 cross-origin HttpOnly 쿠키 설정 대신 프론트엔드 `/api/auth/callback?token=<jwt>`로 리디렉션. Safari ITP가 차단하던 cross-origin 쿠키 문제를 근본적으로 해결. Google/Kakao/Naver 세 OAuth 제공자 모두 동일하게 처리됨.
+- **Places 라우트 순서** — `/places/:googlePlaceId/videos`가 `/places/:googlePlaceId`보다 먼저 등록되지 않아 중첩 라우트가 충돌하던 문제 수정.
+
 ## [0.1.0] - 2026-04-22
 
 ### Added
