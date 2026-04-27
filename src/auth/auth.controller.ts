@@ -55,21 +55,15 @@ export class AuthController {
     return this.handleLoginSuccess(req.user, res);
   }
 
-  // 공통 로그인 성공 처리 (JWT 쿠키 설정 및 리다이렉트)
+  // 공통 로그인 성공 처리 (BFF 패턴: 프론트엔드 /api/auth/callback 으로 토큰 전달)
+  // Safari ITP 대응: 백엔드가 cross-origin 쿠키를 설정하면 Safari가 차단하므로,
+  // 대신 JWT를 URL 파라미터에 담아 프론트엔드 API 라우트로 리디렉션한다.
+  // 프론트엔드가 same-origin HttpOnly 쿠키를 설정한 뒤 / 로 이동.
   private async handleLoginSuccess(user: AuthenticatedUser, res: Response) {
     const { access_token } = await this.authService.login(user);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-    const isProduction = process.env.NODE_ENV === 'production';
-    res.cookie('jwt', access_token, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax', // 크로스 도메인 쿠키 전송을 위해 production에서 none 사용
-      path: '/',
-      maxAge: 3600000, // 1시간
-    });
-
-    return res.redirect(frontendUrl);
+    return res.redirect(`${frontendUrl}/api/auth/callback?token=${access_token}`);
   }
 
   /**
