@@ -29,6 +29,7 @@ export class PlacesService {
       countryCode: p.countryCode,
       lat: p.lat,
       lng: p.lng,
+      category: p.category ?? null,
       videos: p.appearances.map((a) => ({
         videoId: a.video.videoId,
         title: a.video.title,
@@ -64,6 +65,7 @@ export class PlacesService {
       countryCode: p.countryCode,
       lat: p.lat,
       lng: p.lng,
+      category: p.category ?? null,
       videos: p.appearances.map((a) => ({
         videoId: a.video.videoId,
         title: a.video.title,
@@ -89,6 +91,7 @@ export class PlacesService {
       countryCode: place.countryCode,
       lat: place.lat,
       lng: place.lng,
+      category: place.category ?? null,
     };
   }
 
