@@ -24,6 +24,7 @@ export interface SaveVideoDto {
     countryCode?: string
     lat?: number
     lng?: number
+    category?: string
   }[]
 }
 
@@ -110,6 +111,7 @@ export class VideosService {
             countryCode: p.countryCode,
             lat: p.lat,
             lng: p.lng,
+            category: p.category,
           },
           create: {
             googlePlaceId: p.googlePlaceId,
@@ -120,6 +122,7 @@ export class VideosService {
             countryCode: p.countryCode,
             lat: p.lat,
             lng: p.lng,
+            category: p.category,
           },
         })
         placeId = place.id
