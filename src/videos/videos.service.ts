@@ -28,6 +28,8 @@ export interface SaveVideoDto {
   }[]
 }
 
+const VALID_CATEGORIES = new Set(['restaurant', 'cafe', 'attraction', 'shopping', 'accommodation'])
+
 @Injectable()
 export class VideosService {
   constructor(private readonly prisma: PrismaService) {}
@@ -101,6 +103,12 @@ export class VideosService {
       let placeId: string | null = null
 
       if (p.googlePlaceId && p.lat != null && p.lng != null) {
+        // Validation Guard: unknown category -> null
+        const validatedCategory = p.category && VALID_CATEGORIES.has(p.category) ? p.category : null
+        if (p.category && !validatedCategory) {
+          console.warn(`[saveVideo] Unknown category "${p.category}" for place "${p.localName}" — coerced to null`)
+        }
+
         const place = await this.prisma.place.upsert({
           where: { googlePlaceId: p.googlePlaceId },
           update: {
@@ -111,7 +119,7 @@ export class VideosService {
             countryCode: p.countryCode,
             lat: p.lat,
             lng: p.lng,
-            category: p.category,
+            category: validatedCategory,
           },
           create: {
             googlePlaceId: p.googlePlaceId,
@@ -122,7 +130,7 @@ export class VideosService {
             countryCode: p.countryCode,
             lat: p.lat,
             lng: p.lng,
-            category: p.category,
+            category: validatedCategory,
           },
         })
         placeId = place.id
