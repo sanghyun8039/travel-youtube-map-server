@@ -1,26 +1,18 @@
 import { PlacesService } from './places.service'
-
-jest.mock('pg', () => ({
-  Pool: jest.fn().mockImplementation(() => ({})),
-}))
-
-jest.mock('@prisma/adapter-pg', () => ({
-  PrismaPg: jest.fn().mockImplementation(() => ({})),
-}))
+import type { PrismaService } from '../prisma/prisma.service'
 
 const mockFindUnique = jest.fn()
-jest.mock('@prisma/client', () => ({
-  PrismaClient: jest.fn().mockImplementation(() => ({
-    place: { findUnique: mockFindUnique },
-  })),
-}))
+
+const mockPrisma = {
+  place: { findUnique: mockFindUnique },
+} as unknown as PrismaService
 
 describe('PlacesService.getVideosByPlace', () => {
   let service: PlacesService
 
   beforeEach(() => {
     jest.clearAllMocks()
-    service = new PlacesService()
+    service = new PlacesService(mockPrisma)
   })
 
   it('returns [] when place is not found', async () => {

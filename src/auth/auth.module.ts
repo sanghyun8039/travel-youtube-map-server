@@ -7,6 +7,7 @@ import { KakaoStrategy } from './strategies/kakao.strategy';
 import { NaverStrategy } from './strategies/naver.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { getJwtSecret } from '../config/config';
 
 // 환경변수가 존재하는 OAuth 전략만 동적으로 등록
 const oauthStrategies = [
@@ -19,7 +20,7 @@ const oauthStrategies = [
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'fallback_secret_change_me',
+      secret: getJwtSecret(),
       signOptions: { expiresIn: '1h' },
     }),
   ],

@@ -41,6 +41,7 @@ model Place {
   countryCode   String?
   lat           Float
   lng           Float
+  category      String?
   createdAt     DateTime @default(now())
 
   appearances   VideoPlace[]

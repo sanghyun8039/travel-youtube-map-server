@@ -1,13 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaClient } from "@prisma/client";
-import { Pool } from "pg";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class PlacesService {
-  private pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  private adapter = new PrismaPg(this.pool);
-  private prisma = new PrismaClient({ adapter: this.adapter });
+  constructor(private readonly prisma: PrismaService) {}
 
   // 모든 장소 (지도 표시용)
   async getAllPlaces() {
@@ -33,6 +29,7 @@ export class PlacesService {
       countryCode: p.countryCode,
       lat: p.lat,
       lng: p.lng,
+      category: p.category ?? null,
       videos: p.appearances.map((a) => ({
         videoId: a.video.videoId,
         title: a.video.title,
@@ -68,6 +65,7 @@ export class PlacesService {
       countryCode: p.countryCode,
       lat: p.lat,
       lng: p.lng,
+      category: p.category ?? null,
       videos: p.appearances.map((a) => ({
         videoId: a.video.videoId,
         title: a.video.title,
@@ -76,6 +74,25 @@ export class PlacesService {
         channelName: a.video.channel.channelName,
       })),
     }));
+  }
+
+  async getPlaceById(googlePlaceId: string) {
+    const place = await this.prisma.place.findUnique({
+      where: { googlePlaceId },
+    });
+    if (!place) return null;
+    return {
+      id: place.id,
+      googlePlaceId: place.googlePlaceId,
+      name: place.name,
+      address: place.address,
+      city: place.city,
+      country: place.country,
+      countryCode: place.countryCode,
+      lat: place.lat,
+      lng: place.lng,
+      category: place.category ?? null,
+    };
   }
 
   async getVideosByPlace(googlePlaceId: string, excludeVideoId?: string) {

@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { PrismaClient } from '@prisma/client'
-import { Pool } from 'pg'
-import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaService } from '../prisma/prisma.service'
 
 export interface SaveVideoDto {
   videoId: string
@@ -26,14 +24,15 @@ export interface SaveVideoDto {
     countryCode?: string
     lat?: number
     lng?: number
+    category?: string
   }[]
 }
 
+const VALID_CATEGORIES = new Set(['restaurant', 'cafe', 'attraction', 'shopping', 'accommodation'])
+
 @Injectable()
 export class VideosService {
-  private pool = new Pool({ connectionString: process.env.DATABASE_URL })
-  private adapter = new PrismaPg(this.pool)
-  private prisma = new PrismaClient({ adapter: this.adapter })
+  constructor(private readonly prisma: PrismaService) {}
 
   async saveVideo(dto: SaveVideoDto) {
     let channelInfo = dto.channel
@@ -104,6 +103,12 @@ export class VideosService {
       let placeId: string | null = null
 
       if (p.googlePlaceId && p.lat != null && p.lng != null) {
+        // Validation Guard: unknown category -> null
+        const validatedCategory = p.category && VALID_CATEGORIES.has(p.category) ? p.category : null
+        if (p.category && !validatedCategory) {
+          console.warn(`[saveVideo] Unknown category "${p.category}" for place "${p.localName}" — coerced to null`)
+        }
+
         const place = await this.prisma.place.upsert({
           where: { googlePlaceId: p.googlePlaceId },
           update: {
@@ -114,6 +119,7 @@ export class VideosService {
             countryCode: p.countryCode,
             lat: p.lat,
             lng: p.lng,
+            category: validatedCategory,
           },
           create: {
             googlePlaceId: p.googlePlaceId,
@@ -124,6 +130,7 @@ export class VideosService {
             countryCode: p.countryCode,
             lat: p.lat,
             lng: p.lng,
+            category: validatedCategory,
           },
         })
         placeId = place.id
