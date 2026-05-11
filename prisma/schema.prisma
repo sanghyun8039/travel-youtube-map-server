@@ -46,6 +46,7 @@ model Place {
 
   appearances   VideoPlace[]
   favoritePlaces FavoritePlace[]
+  coursePlaces   CoursePlace[]
 }
 
 model VideoPlace {
@@ -74,6 +75,7 @@ model User {
   socialAccounts SocialAccount[]
   favoritePlaces FavoritePlace[]
   savedVideos    SavedVideo[]
+  courses        Course[]
 }
 
 model SocialAccount {
@@ -107,4 +109,26 @@ model SavedVideo {
   createdAt DateTime @default(now())
 
   @@unique([userId, videoId])
+}
+
+model Course {
+  id        String        @id @default(uuid())
+  userId    String
+  name      String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  user      User          @relation(fields: [userId], references: [id])
+  places    CoursePlace[]
+}
+
+model CoursePlace {
+  id         String   @id @default(uuid())
+  courseId   String
+  placeId    String
+  orderIndex Int
+  createdAt  DateTime @default(now())
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  place      Place    @relation(fields: [placeId], references: [id])
+
+  @@unique([courseId, placeId])
 }
