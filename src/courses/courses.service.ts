@@ -61,6 +61,52 @@ export class CoursesService {
     });
   }
 
+  async updateCourse(userId: string, courseId: string, name: string) {
+    const course = await this.prisma.course.findUnique({ where: { id: courseId } });
+    if (!course) throw new NotFoundException('Course not found');
+    if (course.userId !== userId) throw new ForbiddenException();
+    return this.prisma.course.update({
+      where: { id: courseId },
+      data: { name },
+      select: { id: true, name: true, updatedAt: true },
+    });
+  }
+
+  async deleteCourse(userId: string, courseId: string) {
+    const course = await this.prisma.course.findUnique({ where: { id: courseId } });
+    if (!course) throw new NotFoundException('Course not found');
+    if (course.userId !== userId) throw new ForbiddenException();
+    await this.prisma.course.delete({ where: { id: courseId } });
+    return { deleted: true };
+  }
+
+  async getCourse(userId: string, courseId: string) {
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+      include: {
+        places: {
+          orderBy: { orderIndex: 'asc' },
+          include: {
+            place: {
+              select: {
+                id: true,
+                googlePlaceId: true,
+                name: true,
+                lat: true,
+                lng: true,
+                category: true,
+                address: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!course) throw new NotFoundException('Course not found');
+    if (course.userId !== userId) throw new ForbiddenException();
+    return course;
+  }
+
   async addPlace(userId: string, courseId: string, googlePlaceId: string) {
     const course = await this.prisma.course.findUnique({
       where: { id: courseId },
