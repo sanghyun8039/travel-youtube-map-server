@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CoursesService } from './courses.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { ForbiddenException, ConflictException, BadRequestException } from '@nestjs/common';
 
 const mockPrisma = {
   course: {
@@ -121,6 +122,57 @@ describe('CoursesService', () => {
         name: '나의 서울 코스',
         createdAt: now,
       });
+    });
+  });
+
+  describe('addPlace', () => {
+    it('장소를 코스에 추가한다', async () => {
+      mockPrisma.course.findUnique.mockResolvedValue({
+        id: 'course-uuid-1',
+        userId: 'user-1',
+        _count: { places: 2 },
+      });
+      mockPrisma.place.findUnique.mockResolvedValue({ id: 'place-uuid-1' });
+      mockPrisma.coursePlace.create.mockResolvedValue({
+        id: 'cp-uuid-1',
+        orderIndex: 2,
+      });
+
+      const result = await service.addPlace('user-1', 'course-uuid-1', 'ChIJ_abc');
+
+      expect(mockPrisma.coursePlace.create).toHaveBeenCalledWith({
+        data: { courseId: 'course-uuid-1', placeId: 'place-uuid-1', orderIndex: 2 },
+        select: { id: true, orderIndex: true },
+      });
+      expect(result).toEqual({ id: 'cp-uuid-1', orderIndex: 2 });
+    });
+
+    it('다른 유저의 코스에 추가하면 ForbiddenException', async () => {
+      mockPrisma.course.findUnique.mockResolvedValue({
+        id: 'course-uuid-1',
+        userId: 'other-user',
+        _count: { places: 0 },
+      });
+      mockPrisma.place.findUnique.mockResolvedValue({ id: 'place-uuid-1' });
+
+      await expect(
+        service.addPlace('user-1', 'course-uuid-1', 'ChIJ_abc'),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('이미 추가된 장소면 ConflictException', async () => {
+      mockPrisma.course.findUnique.mockResolvedValue({
+        id: 'course-uuid-1',
+        userId: 'user-1',
+        _count: { places: 1 },
+      });
+      mockPrisma.place.findUnique.mockResolvedValue({ id: 'place-uuid-1' });
+      const p2002 = Object.assign(new Error('Unique constraint'), { code: 'P2002' });
+      mockPrisma.coursePlace.create.mockRejectedValue(p2002);
+
+      await expect(
+        service.addPlace('user-1', 'course-uuid-1', 'ChIJ_abc'),
+      ).rejects.toThrow(ConflictException);
     });
   });
 });

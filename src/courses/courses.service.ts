@@ -60,4 +60,31 @@ export class CoursesService {
       select: { id: true, name: true, createdAt: true },
     });
   }
+
+  async addPlace(userId: string, courseId: string, googlePlaceId: string) {
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+      include: { _count: { select: { places: true } } },
+    });
+    if (!course) throw new NotFoundException('Course not found');
+    if (course.userId !== userId) throw new ForbiddenException();
+
+    const place = await this.prisma.place.findUnique({
+      where: { googlePlaceId },
+      select: { id: true },
+    });
+    if (!place) throw new NotFoundException('Place not found');
+
+    try {
+      return await this.prisma.coursePlace.create({
+        data: { courseId, placeId: place.id, orderIndex: course._count.places },
+        select: { id: true, orderIndex: true },
+      });
+    } catch (e: unknown) {
+      if ((e as { code?: string }).code === 'P2002') {
+        throw new ConflictException('Place already in course');
+      }
+      throw e;
+    }
+  }
 }
