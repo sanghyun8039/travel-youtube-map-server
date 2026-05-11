@@ -117,7 +117,7 @@ model Course {
   name      String
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
-  user      User          @relation(fields: [userId], references: [id])
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   places    CoursePlace[]
 }
 
@@ -128,7 +128,8 @@ model CoursePlace {
   orderIndex Int
   createdAt  DateTime @default(now())
   course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  place      Place    @relation(fields: [placeId], references: [id])
+  place      Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
 
   @@unique([courseId, placeId])
+  @@index([placeId])
 }
