@@ -175,4 +175,34 @@ describe('CoursesService', () => {
       ).rejects.toThrow(ConflictException);
     });
   });
+
+  describe('removePlace', () => {
+    it('장소를 코스에서 제거한다', async () => {
+      mockPrisma.coursePlace.findUnique.mockResolvedValue({
+        id: 'cp-uuid-1',
+        courseId: 'course-uuid-1',
+        course: { userId: 'user-1' },
+      });
+      mockPrisma.coursePlace.delete.mockResolvedValue({});
+
+      await service.removePlace('user-1', 'course-uuid-1', 'cp-uuid-1');
+
+      expect(mockPrisma.coursePlace.delete).toHaveBeenCalledWith({
+        where: { id: 'cp-uuid-1' },
+      });
+    });
+
+    it('다른 유저의 코스 장소 제거 시 ForbiddenException', async () => {
+      mockPrisma.coursePlace.findUnique.mockResolvedValue({
+        id: 'cp-uuid-1',
+        courseId: 'course-uuid-1',
+        course: { userId: 'other-user' },
+      });
+
+      await expect(
+        service.removePlace('user-1', 'course-uuid-1', 'cp-uuid-1'),
+      ).rejects.toThrow(ForbiddenException);
+      expect(mockPrisma.coursePlace.delete).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -87,4 +87,15 @@ export class CoursesService {
       throw e;
     }
   }
+
+  async removePlace(userId: string, courseId: string, coursePlaceId: string) {
+    const cp = await this.prisma.coursePlace.findUnique({
+      where: { id: coursePlaceId },
+      include: { course: { select: { userId: true } } },
+    });
+    if (!cp || cp.courseId !== courseId) throw new NotFoundException('CoursePlace not found');
+    if (cp.course.userId !== userId) throw new ForbiddenException();
+
+    await this.prisma.coursePlace.delete({ where: { id: coursePlaceId } });
+  }
 }
