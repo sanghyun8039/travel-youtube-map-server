@@ -205,4 +205,41 @@ describe('CoursesService', () => {
       expect(mockPrisma.coursePlace.delete).not.toHaveBeenCalled();
     });
   });
+
+  describe('reorderPlaces', () => {
+    it('장소 순서를 변경한다', async () => {
+      mockPrisma.course.findUnique.mockResolvedValue({
+        id: 'course-uuid-1',
+        userId: 'user-1',
+        places: [{ id: 'cp-1' }, { id: 'cp-2' }, { id: 'cp-3' }],
+      });
+      mockPrisma.$transaction.mockImplementation(async (ops: Promise<unknown>[]) => {
+        await Promise.all(ops);
+      });
+      mockPrisma.coursePlace.update.mockResolvedValue({});
+      mockPrisma.coursePlace.findMany.mockResolvedValue([
+        { id: 'cp-3', orderIndex: 0, place: { id: 'p-3', googlePlaceId: 'g3', name: 'C', lat: 0, lng: 0, category: null, address: null } },
+        { id: 'cp-1', orderIndex: 1, place: { id: 'p-1', googlePlaceId: 'g1', name: 'A', lat: 0, lng: 0, category: null, address: null } },
+        { id: 'cp-2', orderIndex: 2, place: { id: 'p-2', googlePlaceId: 'g2', name: 'B', lat: 0, lng: 0, category: null, address: null } },
+      ]);
+
+      const result = await service.reorderPlaces('user-1', 'course-uuid-1', ['cp-3', 'cp-1', 'cp-2']);
+
+      expect(mockPrisma.$transaction).toHaveBeenCalled();
+      expect(result[0].id).toBe('cp-3');
+      expect(result[1].id).toBe('cp-1');
+    });
+
+    it('배열 길이가 코스 장소 수와 다르면 BadRequestException', async () => {
+      mockPrisma.course.findUnique.mockResolvedValue({
+        id: 'course-uuid-1',
+        userId: 'user-1',
+        places: [{ id: 'cp-1' }, { id: 'cp-2' }],
+      });
+
+      await expect(
+        service.reorderPlaces('user-1', 'course-uuid-1', ['cp-1']),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
 });

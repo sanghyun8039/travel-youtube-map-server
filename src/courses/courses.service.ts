@@ -98,4 +98,45 @@ export class CoursesService {
 
     await this.prisma.coursePlace.delete({ where: { id: coursePlaceId } });
   }
+
+  async reorderPlaces(userId: string, courseId: string, orderedCoursePlaceIds: string[]) {
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+      include: { places: { select: { id: true } } },
+    });
+    if (!course) throw new NotFoundException('Course not found');
+    if (course.userId !== userId) throw new ForbiddenException();
+
+    const existingIds = new Set(course.places.map((p) => p.id));
+    if (orderedCoursePlaceIds.length !== existingIds.size) {
+      throw new BadRequestException('All course place IDs required');
+    }
+    if (!orderedCoursePlaceIds.every((id) => existingIds.has(id))) {
+      throw new BadRequestException('Invalid course place ID');
+    }
+
+    await this.prisma.$transaction(
+      orderedCoursePlaceIds.map((id, index) =>
+        this.prisma.coursePlace.update({ where: { id }, data: { orderIndex: index } }),
+      ),
+    );
+
+    return this.prisma.coursePlace.findMany({
+      where: { courseId },
+      orderBy: { orderIndex: 'asc' },
+      include: {
+        place: {
+          select: {
+            id: true,
+            googlePlaceId: true,
+            name: true,
+            lat: true,
+            lng: true,
+            category: true,
+            address: true,
+          },
+        },
+      },
+    });
+  }
 }
